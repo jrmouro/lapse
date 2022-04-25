@@ -1,22 +1,6 @@
-import { Tree } from "../tree";
 import { ILapse, Lapse } from "./lapse";
-import { _LapseHow } from "./lapseHow";
 import { ILapseIntent } from "./lapseIntent";
-
-
-export class LapseTree<T> extends Tree {
-
-    constructor(root: ILapse<T>) {
-        super(root);
-    }
-
-    add(lapse: ILapse<T> | ILapse<T>[], how: _LapseHow<T>, final: boolean = false, level: number = 0): ILapse<T>[] {
-
-        return <ILapse<T>[]>super.add(lapse, how, final, level);
-
-    }
-
-}
+import {LapseTree } from "./lapseTree";
 
 export interface ILapseApplicationResultCallback<T> {
 
@@ -36,6 +20,7 @@ export interface ILapseApplication<T> {
 
 export class LapseApplication<T> implements ILapseApplication<T>{
 
+
     run(
         root: Lapse<T> | LapseTree<T>,
         intents: ILapseIntent<T>[],
@@ -46,7 +31,7 @@ export class LapseApplication<T> implements ILapseApplication<T>{
 
         if (root instanceof Lapse) {
 
-            tree = new LapseTree(root.clone());
+            tree = new LapseTree(new BuilderLapse<T>().get(root));
 
         } else {
             

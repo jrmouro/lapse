@@ -1,11 +1,10 @@
-import { IIdentifiable } from "../identifiable";
+import { IIdentifiable } from "./identifiable";
 
 export interface ILapse<T> extends IIdentifiable<T> {
 
     start(value?: number): number;
     len(value?: number): number;
     end(): number;
-    clone(): ILapse<T>;
 
 }
 
@@ -20,10 +19,6 @@ export class Lapse<T> implements ILapse<T>{
         protected _id: T,
         protected _start: number = 1,
         protected _len: number = 1) { }
-
-    clone(): ILapse<T> {
-        return new Lapse<T>(this.id(), this.start(), this.len());
-    }
 
     id(value?: T): T {
         if (value) this._id = value;
@@ -62,9 +57,9 @@ export class DependencyIdLapse<T> extends Lapse<T>{
     _resultsLenMap: Map<T, number> = new Map();
     _resultsStartMap: Map<T, number> = new Map();
     _resultsEndMap: Map<T, number> = new Map();
-    _dependency: Map<T, IDependencyRatesLapse> = new Map(); 
+    _dependency: Map<T, IDependencyRatesLapse> = new Map();
 
-    constructor(id: T, start:number = 0, len:number = 0) {
+    constructor(id: T, start: number = 0, len: number = 0) {
 
         super(id, start, len);
 
@@ -114,7 +109,7 @@ export class DependencyIdLapse<T> extends Lapse<T>{
 
     len(value?: number): number {
 
-        if(this._dependency.size === 0) return super.len(value);
+        if (this._dependency.size === 0) return super.len(value);
 
         let min = Number.MAX_SAFE_INTEGER;
 
@@ -130,7 +125,7 @@ export class DependencyIdLapse<T> extends Lapse<T>{
 
     start(value?: number): number {
 
-        if(this._dependency.size === 0) return super.start(value);
+        if (this._dependency.size === 0) return super.start(value);
 
         let max = Number.MIN_SAFE_INTEGER;
 

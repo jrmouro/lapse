@@ -1,27 +1,29 @@
-import { IClonable } from "./clonable";
+import { IBuilder } from "./builder";
 import { IHow } from "./how";
 
 export interface ITree {
-    add(info: IClonable | IClonable[], how: IHow, final: boolean, level: number): IClonable[];
+    add(info: Object | Object[], how: IHow, final: boolean): Object[];
     toString(): string;
-    find(callback: (clonable: IClonable) => boolean): boolean;
 }
 
 export class Tree implements ITree {
 
-    constructor(protected _info: IClonable, private _final: boolean = false) { }
-
+    constructor(protected _info: Object, private _builderInfo: IBuilder, private _final: boolean = false) { }
     protected _childs: Tree[] = [];
 
-    add(info: IClonable | IClonable[], how: IHow, final: boolean = false, level: number = 0): IClonable[] {
+    add(child: Object | Object[], how: IHow, final: boolean = false): Object[] {
+        return this.addAux(child, how, final, 0);
+    }
 
-        let ret: IClonable[] = [];
+    addAux(child: Object | Object[], how: IHow, final: boolean = false, level: number = 0): Object[] {
+
+        let ret: Object[] = [];
 
         if (!this._final) {
 
-            if (info instanceof Array) {
+            if (child instanceof Array) {
 
-                info.forEach((i) => {
+                child.forEach((i) => {
 
                     this.add(i, how.clone()).forEach((ii) => {
 
@@ -33,22 +35,23 @@ export class Tree implements ITree {
 
             } else {
 
-                let filtered = how.filter(this._info.clone(), info.clone(), level, this._childs.length === 0);
+                let filtered = how.filter(this._builderInfo.get(this._info), this._builderInfo.get(child), level, this._childs.length === 0);
 
-                if (filtered !== undefined) {
+                if (filtered) {
 
-                    if (how.divert(this._info.clone(), filtered, level, this._childs.length === 0)) {
+                    if (how.divert(this._builderInfo.get(this._info), this._builderInfo.get(child),level, this._childs.length === 0)) {
 
-                        how.builder(this._info.clone(), filtered, level, this._childs.length === 0).forEach((ii) => {
+                        how.builder(this._builderInfo.get(this._info), this._builderInfo.get(child), this._builderInfo).forEach((resultChild) => {
 
-                            if (how.result(filtered!, ii)) {
+                            if (how.result(this._builderInfo.get(child), this._builderInfo.get(resultChild))) {
 
-                                ret.push(ii.clone());
-                                this._childs.push(new Tree(ii.clone(), final))
+                                ret.push(this._builderInfo.get(resultChild));
+
+                                this._childs.push(new Tree(this._builderInfo.get(resultChild), this._builderInfo, final))
 
                             } else {
 
-                                this._childs.push(new Tree(ii.clone(), this._final))
+                                this._childs.push(new Tree(this._builderInfo.get(resultChild), this._builderInfo, this._final))
 
                             }
 
@@ -60,7 +63,7 @@ export class Tree implements ITree {
 
                             for (let index = 0; index < this._childs.length; index++) {
 
-                                this._childs[index].add(filtered.clone(), how, final, level + 1).forEach((r) => {
+                                this._childs[index].addAux(this._builderInfo.get(filtered), how, final, level + 1).forEach((r) => {
 
                                     ret.push(r);
 
@@ -78,7 +81,7 @@ export class Tree implements ITree {
 
                             for (let index = this._childs.length - 1; index >= 0; index--) {
 
-                                this._childs[index].add(filtered.clone(), how, final, level + 1).forEach((r) => {
+                                this._childs[index].addAux(this._builderInfo.get(filtered), how, final, level + 1).forEach((r) => {
 
                                     ret.push(r);
 
@@ -131,17 +134,17 @@ export class Tree implements ITree {
 
     }
 
-    find(callback: (clonable: IClonable) => boolean): boolean {
-        
+    find(callback: (clonable: Object) => boolean): boolean {
+
         let ret = callback(this._info);
 
-        if(!ret){
+        if (!ret) {
 
-            for(var tree of this._childs){
+            for (var tree of this._childs) {
 
                 ret = tree.find(callback);
 
-                if(!ret) return ret;
+                if (!ret) return ret;
 
             }
 

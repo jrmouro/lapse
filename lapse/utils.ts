@@ -1,4 +1,4 @@
-import { ILapse } from "./lapse/lapse";
+import { ILapse } from "./lapse";
 
 
 export function intersectionValues(values: number[][]): number[] {

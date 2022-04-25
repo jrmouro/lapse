@@ -1,79 +1,55 @@
-import { IFilter } from "../filter";
+import { IFilterTree } from "../tree/filter_tree";
 import { ILapse } from "./lapse";
 
-
-export abstract class _LapseFilter<T> implements IFilter {
-
-    abstract filter(parent: ILapse<T>, child: ILapse<T>, level: number, leaf: boolean): ILapse<T> | undefined;
-    abstract clone(): _LapseFilter<T>;
-
+export interface ILapseFilterTree<T> extends IFilterTree{
+    filter(parent: ILapse<T>, child: ILapse<T>, level: number, leaf: boolean): boolean;
+    clone(): ILapseFilterTree<T>;
 }
 
-export class FixedLapseFilter<T> extends _LapseFilter<T>{
 
-    filter(parent: ILapse<T>, child: ILapse<T>, level: number, leaf: boolean): ILapse<T> | undefined {
+export class LapseFilterTree<T> implements ILapseFilterTree<T> {
+
+    filter(parent: ILapse<T>, child: ILapse<T>, level: number, leaf: boolean): boolean {
 
         if (child.start() >= parent.start() && child.end() <= parent.end()) {
 
-            return child;
+            return true;
 
         }
 
-        return undefined;
+        return false;
 
     }
 
-    clone(): FixedLapseFilter<T> {
+    clone(): LapseFilterTree<T> {
 
-        return new FixedLapseFilter();
-
-    }
-
-}
-
-export class AheadFlexibleLapseFilter<T> extends _LapseFilter<T>{
-
-    filter(parent: ILapse<T>, child: ILapse<T>, level: number, leaf: boolean): ILapse<T> | undefined {
-
-        if (child.start() > parent.end()) {
-
-            return undefined;
-
-        }
-
-        if (child.start() < parent.start()) {
-
-            child.start(parent.start());
-
-        }
-
-        let diff = parent.end() - child.end();
-
-        if (diff < 0) {
-
-            child.len(child.len() + diff);
-
-        }
-
-        return child;
-
-    }
-
-    clone(): AheadFixedLapseFilter<T> {
-
-        return new AheadFlexibleLapseFilter();
+        return new LapseFilterTree();
 
     }
 
 }
 
-export class AheadFixedLapseFilter<T> extends FixedLapseFilter<T>{
+export class LevelLapseFilterTree<T> extends LapseFilterTree<T>{
 
-    filter(parent: ILapse<T>, child: ILapse<T>, level: number, leaf: boolean): ILapse<T> | undefined {
+    protected _level: number = -1;
+    private _previousLevel: number = -1;
 
-        if (child.start() < parent.start()) {
+    constructor(protected _maxLevel?: number) {
+        super();
+    }
 
-            child.start(parent.start());
+    filter(parent: ILapse<T>, child: ILapse<T>, level: number, leaf: boolean): boolean {
+
+        this._previousLevel = this._level;
+        this._level = level;
+
+        if (this._maxLevel) {
+
+            if (level > this._maxLevel) {
+
+                return false;
+
+            }
 
         }
 
@@ -81,21 +57,26 @@ export class AheadFixedLapseFilter<T> extends FixedLapseFilter<T>{
 
     }
 
-    clone(): AheadFixedLapseFilter<T> {
+    clone(): LapseFilterTree<T> {
 
-        return new AheadFixedLapseFilter();
+        return new LevelLapseFilterTree(this._maxLevel);
 
+    }
+
+
+    backtracking(): boolean {
+        return this._previousLevel > this._level;
     }
 
 }
 
-export class IdCheckpointLapseFilter<T> extends _LapseFilter<T>{
+
+export class IdCheckpointLapseFilter<T> extends LevelLapseFilterTree<T>{
 
     protected _mapLevel: Map<T, number> = new Map();
-    private _level: number = -1;
 
-    constructor(protected checkpoints: Set<T>) {
-        super();
+    constructor(private checkpoints: Set<T>, maxLevel?: number) {
+        super(maxLevel);
         checkpoints.forEach((id) => {
             this._mapLevel.set(id, -1);
         });
@@ -117,130 +98,63 @@ export class IdCheckpointLapseFilter<T> extends _LapseFilter<T>{
 
     }
 
-    backtracking(level: number, checkpoint: T): void {
+    filter(parent: ILapse<T>, child: ILapse<T>, level: number, leaf: boolean): boolean {
 
-        if (level <= this._level) {
+        let aux = super.filter(parent, child, level, leaf);
 
-            this._mapLevel.forEach((l, id) => {
+        if (aux) {
 
-                if (level <= l) {
+            let levelParent = this._mapLevel.get(parent.id());
 
-                    this._mapLevel.set(id, -1);
+            if (levelParent !== undefined) {
+
+                if (levelParent < 0) {
+
+                    this._mapLevel.set(parent.id(), level);
+
+                }else if(levelParent >= level){
+
+                    this._mapLevel.set(parent.id(), -1);
 
                 }
 
-            })
+            }
+
+            return this.check();
 
         }
 
-        if (this._mapLevel.get(checkpoint) !== undefined)
-            this._mapLevel.set(checkpoint, level);
-
-
-
-        this._level = level;
+        return false;
 
     }
 
-    filter(parent: ILapse<T>, child: ILapse<T>, level: number, leaf: boolean): ILapse<T> | undefined {
+    clone(): LapseFilterTree<T> {
 
-        this.backtracking(level, parent.id());
-
-        if (!leaf || (leaf && this.check())) {
-
-            return child;
-
-        }
-
-        return undefined;
-
-    }
-
-    clone(): _LapseFilter<T> {
-
-        return new IdCheckpointLapseFilter(this.checkpoints);
+        return new IdCheckpointLapseFilter<T>(this.checkpoints, this._maxLevel);
 
     }
 
 }
 
-export class IdOrderCheckpointLapseFilter<T> extends IdCheckpointLapseFilter<T>{
-
-    constructor(checkpoints: Set<T>) {
-        super(checkpoints);
-    }
-
-    check(): boolean {
-
-        let aux = -1;
-
-        for (let id of this.checkpoints) {
-
-            let value = this._mapLevel.get(id);
-
-            if (value! < 0 || value! < aux) {
-                return false;
-            }
-
-            aux = value!;
-
-        }
-
-        return true;
-
-    }
-}
-
-
-export class IdPathCheckpointLapseFilter<T> extends IdCheckpointLapseFilter<T>{
-
-    constructor(checkpoints: Set<T>) {
-        super(checkpoints);
-    }
-
-    check(): boolean {
-
-        let aux = -1;
-
-        for (let id of this.checkpoints) {
-
-            let value = this._mapLevel.get(id);
-
-            if (value! < 0 || value! < aux) {
-                return false;
-            }
-
-            if (aux !== -1) {
-                if (value! - aux > 1) return false;
-            }
-
-            aux = value!;
-
-        }
-
-        return true;
-
-    }
-}
-export class IdTargetLapseFilter<T> extends _LapseFilter<T>{
+export class IdTargetLapseFilter<T> extends LapseFilterTree<T>{
 
     constructor(private targets: Set<T>) {
         super();
     }
 
-    filter(parent: ILapse<T>, child: ILapse<T>, level: number, leaf: boolean): ILapse<T> | undefined {
+    filter(parent: ILapse<T>, child: ILapse<T>, level: number, leaf: boolean): boolean {
 
         if (!leaf || (leaf && this.targets.has(parent.id()))) {
 
-            return child;
+            return true;
 
         }
 
-        return undefined;
+        return false;
 
     }
 
-    clone(): _LapseFilter<T> {
+    clone(): LapseFilterTree<T> {
 
         return new IdTargetLapseFilter(this.targets);
 

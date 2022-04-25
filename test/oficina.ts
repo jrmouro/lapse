@@ -1,6 +1,6 @@
 import { DependencyIdLapse, ILapse, Lapse } from "../lapse/lapse";
-import { ILapseApplicationResultCallback, LapseApplication, LapseTree } from "../lapse/lapseApplication";
-import { AheadFlexibleLapseFilter, IdTargetLapseFilter } from "../lapse/lapseFilter";
+import { ILapseApplicationResultCallback, LapseApplication } from "../lapse/lapseApplication";
+import { IdTargetLapseFilter } from "../lapse/lapseFilter";
 import { AndLapseFilters } from "../lapse/lapseFilters";
 import { ConcurrentlyLapseHow, LengthConcurrentlyLapseHow, LengthLapseHow, LengthParallelLapseHow } from "../lapse/lapseHow";
 import { ILapseIntent } from "../lapse/lapseIntent";
