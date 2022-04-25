@@ -1,8 +1,8 @@
 import { ILapse } from "./lapse";
-import { _LapseHow } from "./lapseHow";
+import { ILapseHow } from "./lapseHow";
 
-export interface ILapseIntent<T>{
-    lapse:ILapse<T> | ILapse<T>[];
-    how:_LapseHow<T>;
+export interface ILapseIntent<T> {
+    lapse: ILapse<T> | ILapse<T>[];
+    how: ILapseHow<T>;
     final: boolean;
 }

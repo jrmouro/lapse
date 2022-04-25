@@ -1,11 +1,10 @@
 import { IHow } from "../tree/how";
 import { ILapse } from "./lapse";
 import { ILapseBuilder } from "./lapseBuilder";
-import { ILapseBuilderTree } from "./lapseBuilderTree";
-import { ILapseDivertTree } from "./lapseDivertTree";
-import { ILapseFilterTree } from "./lapseFilter";
-import { LapseFilters } from "./lapseFilters";
-import { ILapseResultTree } from "./lapseResultTree";
+import { ComposedLapseBuilderTree, ILapseBuilderTree } from "./lapseBuilderTree";
+import { ILapseDivertTree, LapseDivertTree } from "./lapseDivertTree";
+import { ILapseFilterTree, LapseFilterTree } from "./lapseFilter";
+import { ILapseResultTree, LapseResultTree } from "./lapseResultTree";
 
 export interface ILapseHow<T> extends IHow {
     builder(parent: ILapse<T>, child: ILapse<T>, builder: ILapseBuilder<T>): ILapse<T>[];
@@ -21,10 +20,11 @@ export interface ILapseHow<T> extends IHow {
 export class LapseHow<T> implements ILapseHow<T> {
 
     constructor(
-        protected _lapseFilterTree: ILapseFilterTree<T>,
-        protected _lapseBuilderTree: ILapseBuilderTree<T>,
-        protected _lapseDivertTree: ILapseDivertTree<T>,
-        protected _lapseResultTree: ILapseResultTree<T>,
+        
+        protected _lapseBuilderTree: ILapseBuilderTree<T> = new ComposedLapseBuilderTree(),
+        protected _lapseFilterTree: ILapseFilterTree<T> = new LapseFilterTree(),
+        protected _lapseDivertTree: ILapseDivertTree<T> = new LapseDivertTree(),
+        protected _lapseResultTree: ILapseResultTree<T> = new LapseResultTree(),
         protected _direction: boolean = true) { }
     
     
@@ -39,8 +39,8 @@ export class LapseHow<T> implements ILapseHow<T> {
     clone(): ILapseHow<T>{
 
         return new LapseHow(
-            this._lapseFilterTree.clone(), 
             this._lapseBuilderTree.clone(), 
+            this._lapseFilterTree.clone(), 
             this._lapseDivertTree.clone(),
             this._lapseResultTree.clone(),
             this._direction);

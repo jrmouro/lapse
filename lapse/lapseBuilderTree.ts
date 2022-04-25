@@ -12,7 +12,7 @@ export abstract class BaseLapseBuilderTree<T> implements IBuilderTree {
     abstract builder(parent: ILapse<T>, child: ILapse<T>, builder: ILapseBuilder<T>): ILapse<T>[];
     abstract clone(): ILapseBuilderTree<T>;
     continues(): boolean{
-        return false;
+        return true;
     }
 }
 
@@ -120,6 +120,14 @@ export class LengthLapseBuilderTree<T> extends BaseLapseBuilderTree<T> {
 
         if (this._accumulator > 0) {
 
+            let diff = this._accumulator - child.len();
+
+            if(diff < 0){
+
+                child.len(this._accumulator);                
+
+            }
+
             let ret = this._baseLapseBuilderTree.builder(parent, child, builder);
 
             let acc = 0;
@@ -134,14 +142,15 @@ export class LengthLapseBuilderTree<T> extends BaseLapseBuilderTree<T> {
 
             });
 
-            if (this._accumulator - acc >= 0) {
+            diff = this._accumulator - acc;
+
+            if (diff >= 0) {
 
                 this._accumulator -= acc;
 
                 return ret;
 
             }
-
 
         }
 

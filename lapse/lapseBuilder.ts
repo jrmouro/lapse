@@ -12,3 +12,7 @@ export class LapseBuilder<T> implements ILapseBuilder<T>{
     }
 
 }
+
+// var lapseRef = new Lapse<string>('ref', 3, 3);
+// var builder = new LapseBuilder<string>();
+// console.log(builder.get(lapseRef).toString());

@@ -2,6 +2,7 @@ import { IIdentifiable } from "./identifiable";
 
 export interface ILapse<T> extends IIdentifiable<T> {
 
+    id():T;
     start(value?: number): number;
     len(value?: number): number;
     end(): number;
@@ -152,21 +153,21 @@ export class DependencyIdLapse<T> extends Lapse<T>{
 
 }
 
-var almoco = new Lapse('almoço', 12, 5)
-var louca = new DependencyIdLapse('louça');
-var chao = new DependencyIdLapse('chão');
-var roupa = new DependencyIdLapse('roupa', 8, 2);
+// var almoco = new Lapse('almoço', 12, 5)
+// var louca = new DependencyIdLapse('louça');
+// var chao = new DependencyIdLapse('chão');
+// var roupa = new DependencyIdLapse('roupa', 8, 2);
 
 
-louca.addDependencyLapse(almoco, { start_rate: 1, len_rate: 2 });
-louca.setDependencyResult(almoco);
+// louca.addDependencyLapse(almoco, { start_rate: 1, len_rate: 2 });
+// louca.setDependencyResult(almoco);
 
-chao.addDependencyLapse(louca, { start_rate: 0.7, len_rate: 0.3 })
-chao.setDependencyResult(louca);
+// chao.addDependencyLapse(louca, { start_rate: 0.7, len_rate: 0.3 })
+// chao.setDependencyResult(louca);
 
-roupa.setDependencyResult(almoco)
+// roupa.setDependencyResult(almoco)
 
-console.log(almoco.toString());
-console.log(louca.toString());
-console.log(chao.toString());
-console.log(roupa.toString());
+// console.log(almoco.toString());
+// console.log(louca.toString());
+// console.log(chao.toString());
+// console.log(roupa.toString());

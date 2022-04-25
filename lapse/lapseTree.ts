@@ -1,14 +1,18 @@
 import { Tree } from "../tree/tree";
-import { ILapse, Lapse } from "./lapse";
-import { LapseBuilder } from "./lapseBuilder";
+import { ILapse } from "./lapse";
+import { ILapseBuilder, LapseBuilder } from "./lapseBuilder";
 import { ILapseHow } from "./lapseHow";
 
+export interface ILapseTree<T> extends Tree{
+    
+    add(lapse: ILapse<T> | ILapse<T>[], how: ILapseHow<T>, final: boolean): ILapse<T>[];
+}
 
 export class LapseTree<T> extends Tree{
 
-    constructor(lapse: Lapse<T>, final: boolean = false) {
+    constructor(lapse: ILapse<T>, lapseBuilder: ILapseBuilder<T> = new LapseBuilder(), final: boolean = false) {
 
-        super(lapse, new LapseBuilder(), final);
+        super(lapse, lapseBuilder, final);
 
     }
 

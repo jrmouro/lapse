@@ -13,7 +13,7 @@ export class LapseResultTree<T> implements ILapseResultTree<T>{
     }
 
     clone(): ILapseResultTree<T> {
-        throw new Error("Method not implemented.");
+        return new LapseResultTree();
     }
 
 }

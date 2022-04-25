@@ -63,7 +63,7 @@ export class Tree implements ITree {
 
                             for (let index = 0; index < this._childs.length; index++) {
 
-                                this._childs[index].addAux(this._builderInfo.get(filtered), how, final, level + 1).forEach((r) => {
+                                this._childs[index].addAux(child, how, final, level + 1).forEach((r) => {
 
                                     ret.push(r);
 
@@ -81,7 +81,7 @@ export class Tree implements ITree {
 
                             for (let index = this._childs.length - 1; index >= 0; index--) {
 
-                                this._childs[index].addAux(this._builderInfo.get(filtered), how, final, level + 1).forEach((r) => {
+                                this._childs[index].addAux(child, how, final, level + 1).forEach((r) => {
 
                                     ret.push(r);
 
