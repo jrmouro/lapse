@@ -6,6 +6,21 @@ export interface ILapseFilterTree<T> extends IFilterTree{
     clone(): ILapseFilterTree<T>;
 }
 
+export class NoLapseFilterTree<T> implements ILapseFilterTree<T> {
+
+    filter(parent: ILapse<T>, child: ILapse<T>, level: number, leaf: boolean): boolean {
+
+       return true;
+
+    }
+
+    clone(): ILapseFilterTree<T> {
+
+        return new NoLapseFilterTree();
+
+    }
+
+}
 
 export class LapseFilterTree<T> implements ILapseFilterTree<T> {
 
@@ -21,7 +36,7 @@ export class LapseFilterTree<T> implements ILapseFilterTree<T> {
 
     }
 
-    clone(): LapseFilterTree<T> {
+    clone(): ILapseFilterTree<T> {
 
         return new LapseFilterTree();
 
@@ -57,7 +72,7 @@ export class LevelLapseFilterTree<T> extends LapseFilterTree<T>{
 
     }
 
-    clone(): LapseFilterTree<T> {
+    clone(): ILapseFilterTree<T> {
 
         return new LevelLapseFilterTree(this._maxLevel);
 
@@ -128,7 +143,7 @@ export class IdCheckpointLapseFilter<T> extends LevelLapseFilterTree<T>{
 
     }
 
-    clone(): LapseFilterTree<T> {
+    clone(): ILapseFilterTree<T> {
 
         return new IdCheckpointLapseFilter<T>(this.checkpoints, this._maxLevel);
 
@@ -154,7 +169,7 @@ export class IdTargetLapseFilter<T> extends LapseFilterTree<T>{
 
     }
 
-    clone(): LapseFilterTree<T> {
+    clone(): ILapseFilterTree<T> {
 
         return new IdTargetLapseFilter(this.targets);
 

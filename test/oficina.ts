@@ -1,6 +1,7 @@
 import { ILapse, Lapse } from "../lapse/lapse";
 import { ILapseApplicationResultCallback, LapseApplication } from "../lapse/lapseApplication";
 import { AheadFlexibleLapseBuilderTree, ComposedLapseBuilderTree, LengthLapseBuilderTree } from "../lapse/lapseBuilderTree";
+import { NoLapseFilterTree } from "../lapse/lapseFilter";
 import { LapseHow } from "../lapse/lapseHow";
 import { ILapseIntent } from "../lapse/lapseIntent";
 import { ILapseTree } from "../lapse/lapseTree";
@@ -48,9 +49,10 @@ var lapseHow0 = new LapseHow<string>(
         new ComposedLapseBuilderTree<string>()));
 
 var lapseHow1 = new LapseHow<string>(
-    new AheadFlexibleLapseBuilderTree<string>(
-        new LengthLapseBuilderTree<string>(
-            new ComposedLapseBuilderTree<string>())));
+    new LengthLapseBuilderTree<string>(
+        new AheadFlexibleLapseBuilderTree<string>(
+            new ComposedLapseBuilderTree<string>())),
+    new NoLapseFilterTree());
 
 var intent_almoco: ILapseIntent<string> = {
     lapse: almoco,
